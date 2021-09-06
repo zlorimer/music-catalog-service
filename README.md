@@ -9,6 +9,7 @@ Run docker-compose build
 Then run docker-compose up
 
 ## API ENDPOINTS Exposed
+---
 | /  | Returns "connection accepted" or similar |
 | /artistlist | Returns a list of artists |
 | /albumlist | Returns a list of albums |
@@ -20,3 +21,4 @@ Then run docker-compose up
 | /putalbum/\<uuid\> | Updates an album based on matching UUID |
 | /deleteartist/\<uuid\> | Delets an artist based on UUID |
 | /deletealbum/\<uuid\> | Dletes an album base don UUID |
+---
