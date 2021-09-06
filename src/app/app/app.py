@@ -61,7 +61,7 @@ try:
 
     # POST
     @app.route('/postalbum', methods=['POST'])
-    def post_artist_name():
+    def post_album_name():
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
         _album_title = req_data['album_title']
@@ -108,7 +108,7 @@ try:
 
     # DELETE
     @app.route('/deleteartist/<uuid:id>', methods=['DELETE'])
-    def delete_passenger(id):
+    def delete_artist(id):
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
         query = "DELETE FROM artists WHERE uuid::text = " + "'" + str(id) + "'"
@@ -120,7 +120,7 @@ try:
 
     # DELETE
     @app.route('/deletealbum/<uuid:id>', methods=['DELETE'])
-    def delete_passenger(id):
+    def delete_album(id):
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
         query = "DELETE FROM albums WHERE uuid::text = " + "'" + str(id) + "'"
@@ -132,7 +132,7 @@ try:
 
     # PUT
     @app.route('/putartist/<uuid:id>', methods=['PUT'])
-    def put_passenger(id):
+    def put_artist(id):
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
         query = 'UPDATE artists SET artist_name = %s WHERE uuid::text = ' + \
@@ -148,13 +148,13 @@ try:
 
     # PUT
     @app.route('/putalbum/<uuid:id>', methods=['PUT'])
-    def put_passenger(id):
+    def put_album(id):
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
         _album_title = req_data['album_title']
         _release_date = req_data['release_date']
         _price = req_data['price']
-        query = 'UPDATE artists SET artist_name = %s, album_title = %s, release_date = %s, price = %s WHERE uuid::text = ' + \
+        query = 'UPDATE albums SET artist_name = %s, album_title = %s, release_date = %s, price = %s WHERE uuid::text = ' + \
             "'" + str(id) + "'"
         put_data = (_artist_name, _album_title, _release_date, _price)
         conn = pgdb_conn_pool.getconn()
