@@ -2,11 +2,10 @@
 This is meant to showcase a tiny API for reading/writing to a Postgres DB.
 
 ## INSTALLATION - Using docker-compose
-Clone the repository: https://github.com/zlorimer/music-catalog-service
-
-Change directories to <newly_cloned_dir>/src
-Run docker-compose build
-Then run docker-compose up
+- Clone the repository: https://github.com/zlorimer/music-catalog-service
+- Change directories to <newly_cloned_dir>/src
+- Run docker-compose build
+- Then run docker-compose up
 
 ## API ENDPOINTS Exposed
 ---
