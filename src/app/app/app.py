@@ -34,7 +34,7 @@ try:
     def post_artist_name():
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
-        query = 'INSERT INTO artists(artist) VALUES(%s)'
+        query = 'INSERT INTO artists(artist_name) VALUES(%s)'
         post_data = (_artist_name)
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
