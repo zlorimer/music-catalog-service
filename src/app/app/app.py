@@ -135,8 +135,7 @@ try:
     def put_artist(id):
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
-        query = 'UPDATE artists SET artist_name = %s WHERE uuid::text = ' + \
-            "'" + str(id) + "'"
+        query = 'UPDATE artists SET artist_name = %s WHERE uuid::text = ' + "'" + str(id) + "'"
         put_data = (_artist_name)
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
@@ -154,8 +153,7 @@ try:
         _album_title = req_data['album_title']
         _release_date = req_data['release_date']
         _price = req_data['price']
-        query = 'UPDATE albums SET artist_name = %s, album_title = %s, release_date = %s, price = %s WHERE uuid::text = ' + \
-            "'" + str(id) + "'"
+        query = 'UPDATE albums SET artist_name = %s, album_title = %s, release_date = %s, price = %s WHERE uuid::text = ' + "'" + str(id) + "'"
         put_data = (_artist_name, _album_title, _release_date, _price)
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
