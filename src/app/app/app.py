@@ -84,7 +84,7 @@ class ArtistManager(Resource):
 
     return jsonify({'Message': f'Artist {str(artist)} was deleted'})
 
-api.add_resource(ArtistManager, '/api/v1/artists')
+api.add_resource(ArtistManager, '/api/v2/artists')
 
 if __name__ == '__main__':
   app.run(debug = True)
