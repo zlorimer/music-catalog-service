@@ -1,170 +1,90 @@
-import flask
-import flask_uuid
-import psycopg2
 from flask import Flask, request, jsonify
-from flask_uuid import FlaskUUID
-from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+from flask_restful import Resource, Api
 
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
-FlaskUUID(app)
+api = Api(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///music.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
-# Healthcheck
-@app.route('/')
-def index():
-    return jsonify({'messsage': 'connection successful'}), 201
 
-try:
-    pgdb_conn_pool = psycopg2.pool.ThreadedConnectionPool(1, 20, host="postgres", user="musical", password="abcdefg", database="musicdb")
+class Artist(db.Model):
+  id = db.Column(db.Integer, primary_key = True)
+  artist_name = db.Column(db.String(32))
 
-    # GET all
-    @app.route('/artistlist', methods=['GET'])
-    def get_artist_namelist():
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM artists")
-        resp = cur.fetchall()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+  def __init__(self, id, artist_name):
+    self.id = id
+    self.artist_name = artist_name
 
-    @app.route('/albumlist', methods=['GET'])
-    def get_album_list():
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM albums")
-        resp = cur.fetchall()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
 
-    # POST
-    @app.route('/postartist', methods=['POST'])
-    def post_artist_name():
-        req_data = request.get_json()
-        _artist_name = req_data['artist_name']
-        query = 'INSERT INTO artists(artist_name) VALUES(%s)'
-        post_data = (_artist_name)
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor()
-        cur.execute(query, post_data)
-        conn.commit()
-        cur.close()
-        query = "SELECT * FROM artists WHERE _artist_name = " + "'" + _artist_name + "'"
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(query)
-        resp = cur.fetchall()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+class ArtistSchema(ma.Schema):
+  class Meta:
+    fields = ('id', 'artist_name')
 
-    # POST
-    @app.route('/postalbum', methods=['POST'])
-    def post_album_name():
-        req_data = request.get_json()
-        _artist_name = req_data['artist_name']
-        _album_title = req_data['album_title']
-        _release_date = req_data['release_date']
-        _price = req_data['price']
-        query = 'INSERT INTO albums(artist_name, album_title, release_date, price) VALUES(%s, %s, %s, %s)'
-        post_data = (_artist_name, _album_title, _release_date, _price)
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor()
-        cur.execute(query, post_data)
-        conn.commit()
-        cur.close()
-        query = "SELECT * FROM albums WHERE album_title = " + "'" + _album_title + "'"
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(query)
-        resp = cur.fetchall()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+artist_schema = ArtistSchema()
+artists_schema = ArtistSchema(many = True)
 
-    # GET
-    @app.route('/getartist/<uuid:id>', methods=['GET'])
-    def get_artist_name(id):
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        query = "SELECT * FROM artists where uuid::text = " + "'" + str(id) + "'"
-        cur.execute(query)
-        resp = cur.fetchone()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
 
-    # GET
-    @app.route('/getalbum/<uuid:id>', methods=['GET'])
-    def get_album_title(id):
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        query = "SELECT * FROM albums where uuid::text = " + "'" + str(id) + "'"
-        cur.execute(query)
-        resp = cur.fetchone()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+class ArtistManager(Resource):
+  @staticmethod
+  def get():
+    try: id = request.args['id']
+    except Exception as _: id = None
 
-    # DELETE
-    @app.route('/deleteartist/<uuid:id>', methods=['DELETE'])
-    def delete_artist(id):
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor()
-        query = "DELETE FROM artists WHERE uuid::text = " + "'" + str(id) + "'"
-        cur.execute(query)
-        resp = conn.commit()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+    if not id:
+      artists = Artist.query.all()
+      return jsonify(artists_schema.dump(artists))
+    artist = Artist.query.get(id)
+    return jsonify(artist_schema.dump(artist))
 
-    # DELETE
-    @app.route('/deletealbum/<uuid:id>', methods=['DELETE'])
-    def delete_album(id):
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor()
-        query = "DELETE FROM albums WHERE uuid::text = " + "'" + str(id) + "'"
-        cur.execute(query)
-        resp = conn.commit()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+  @staticmethod
+  def post():
+    artist_name = request.json['artist_name']
 
-    # PUT
-    @app.route('/putartist/<uuid:id>', methods=['PUT'])
-    def put_artist(id):
-        req_data = request.get_json()
-        _artist_name = req_data['artist_name']
-        query = 'UPDATE artists SET artist_name = %s WHERE uuid::text = ' + "'" + str(id) + "'"
-        put_data = (_artist_name)
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor()
-        cur.execute(query, put_data)
-        resp = conn.commit()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
+    artist = Artist(id, artist_name)
+    db.session.add(artist)
+    db.session.commit()
+    return jsonify({
+      'Message': f'Artist {artist_name} has been added'
+    })
 
-    # PUT
-    @app.route('/putalbum/<uuid:id>', methods=['PUT'])
-    def put_album(id):
-        req_data = request.get_json()
-        _artist_name = req_data['artist_name']
-        _album_title = req_data['album_title']
-        _release_date = req_data['release_date']
-        _price = req_data['price']
-        query = 'UPDATE albums SET artist_name = %s, album_title = %s, release_date = %s, price = %s WHERE uuid::text = ' + "'" + str(id) + "'"
-        put_data = (_artist_name, _album_title, _release_date, _price)
-        conn = pgdb_conn_pool.getconn()
-        cur = conn.cursor()
-        cur.execute(query, put_data)
-        resp = conn.commit()
-        cur.close()
-        pgdb_conn_pool.putconn(conn)
-        return jsonify(resp)
 
-finally:
-    print("closing all")
+  @staticmethod
+  def put():
+    try: id = request.args['id']
+    except Exception as _: id = None
+
+    if not id:
+      return jsonify({'Message': 'Must provide an Artist ID'})
+
+    artist = Artist.query.get(id)
+    artist_name = request.json['artist_name']
+    
+    artist.artist_name = artist_name
+    
+    db.session.commit()
+    return jsonify({
+        'Message': f'Artist {artist_name} updated'
+    })
+
+  @staticmethod
+  def delete():
+    try: id = request.args['id']
+    except Exception as _: id = None
+
+    if not id:
+      return jsonify({'Message': 'Must provide an Artist ID'})
+
+    artist = Artist.query.get(id)
+    db.session.delete(artist)
+    db.session.commit()
+
+    return jsonify({'Message': f'Artist {str(artist)} was deleted'})
+
+api.add_resource(ArtistManager, '/api/v1/artists')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+  app.run(debug = True)
