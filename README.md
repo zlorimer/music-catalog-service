@@ -36,7 +36,8 @@ Post an artist
  
  ## ToDo
  - Rewrite the album queries to perform a check for existing artist before inserting
- - Rewrite the database connection protocol to use an ORM (SQLAlchemy preferably) to provide better error handling and more.
+ - Rewrite the app to use the following: 
+   - Flask-Restful, Flask-SQLAlchemy, Flask-Marshmallow (this v2 was SO much cleaner and easier to support)
  - Create helm chart to allow deploying against k8s clusters
  - Fix the 405 errors being presented in some methods
  - Create tests for CI/CD (eg: Do all methods work correctly?)
