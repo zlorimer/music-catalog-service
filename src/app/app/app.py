@@ -43,15 +43,15 @@ try:
     @app.route('/postartist', methods=['POST'])
     def post_artist_name():
         req_data = request.get_json()
-        _artist_name = req_data['artist_name']
+        artist_name = req_data['artist_name']
         query = 'INSERT INTO artists(_artist_name) VALUES(%s)'
-        post_data = (_artist_name)
+        post_data = (artist_name)
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
         cur.execute(query, post_data)
         conn.commit()
         cur.close()
-        query = "SELECT * FROM artists WHERE artist_name = " + "'" + _artist_name + "'"
+        query = "SELECT * FROM artists WHERE artist_name = " + "'" + artist_name + "'"
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute(query)
         resp = cur.fetchall()
