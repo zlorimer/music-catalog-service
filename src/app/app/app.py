@@ -29,6 +29,16 @@ try:
         pgdb_conn_pool.putconn(conn)
         return jsonify(resp)
 
+    @app.route('/albumlist', methods=['GET'])
+    def get_album_list():
+        conn = pgdb_conn_pool.getconn()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT * FROM albums")
+        resp = cur.fetchall()
+        cur.close()
+        pgdb_conn_pool.putconn(conn)
+        return jsonify(resp)
+
     # POST
     @app.route('/postartist', methods=['POST'])
     def post_artist_name():
@@ -49,12 +59,47 @@ try:
         pgdb_conn_pool.putconn(conn)
         return jsonify(resp)
 
+    # POST
+    @app.route('/postalbum', methods=['POST'])
+    def post_artist_name():
+        req_data = request.get_json()
+        _artist_name = req_data['artist_name']
+        _album_title = req_data['album_title']
+        _release_date = req_data['release_date']
+        _price = req_data['price']
+        query = 'INSERT INTO albums(artist_name, album_title, release_date, price) VALUES(%s, %s, %s, %s)'
+        post_data = (_artist_name, _album_title, _release_date, _price)
+        conn = pgdb_conn_pool.getconn()
+        cur = conn.cursor()
+        cur.execute(query, post_data)
+        conn.commit()
+        cur.close()
+        query = "SELECT * FROM albums WHERE album_title = " + "'" + _album_title + "'"
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(query)
+        resp = cur.fetchall()
+        cur.close()
+        pgdb_conn_pool.putconn(conn)
+        return jsonify(resp)
+
     # GET
     @app.route('/getartist/<uuid:id>', methods=['GET'])
     def get_artist_name(id):
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         query = "SELECT * FROM artists where uuid::text = " + "'" + str(id) + "'"
+        cur.execute(query)
+        resp = cur.fetchone()
+        cur.close()
+        pgdb_conn_pool.putconn(conn)
+        return jsonify(resp)
+
+    # GET
+    @app.route('/getalbum/<uuid:id>', methods=['GET'])
+    def get_album_title(id):
+        conn = pgdb_conn_pool.getconn()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        query = "SELECT * FROM albums where uuid::text = " + "'" + str(id) + "'"
         cur.execute(query)
         resp = cur.fetchone()
         cur.close()
@@ -73,6 +118,18 @@ try:
         pgdb_conn_pool.putconn(conn)
         return jsonify(resp)
 
+    # DELETE
+    @app.route('/deletealbum/<uuid:id>', methods=['DELETE'])
+    def delete_passenger(id):
+        conn = pgdb_conn_pool.getconn()
+        cur = conn.cursor()
+        query = "DELETE FROM albums WHERE uuid::text = " + "'" + str(id) + "'"
+        cur.execute(query)
+        resp = conn.commit()
+        cur.close()
+        pgdb_conn_pool.putconn(conn)
+        return jsonify(resp)
+
     # PUT
     @app.route('/putartist/<uuid:id>', methods=['PUT'])
     def put_passenger(id):
@@ -81,6 +138,25 @@ try:
         query = 'UPDATE artists SET artist_name = %s WHERE uuid::text = ' + \
             "'" + str(id) + "'"
         put_data = (_artist_name)
+        conn = pgdb_conn_pool.getconn()
+        cur = conn.cursor()
+        cur.execute(query, put_data)
+        resp = conn.commit()
+        cur.close()
+        pgdb_conn_pool.putconn(conn)
+        return jsonify(resp)
+
+    # PUT
+    @app.route('/putalbum/<uuid:id>', methods=['PUT'])
+    def put_passenger(id):
+        req_data = request.get_json()
+        _artist_name = req_data['artist_name']
+        _album_title = req_data['album_title']
+        _release_date = req_data['release_date']
+        _price = req_data['price']
+        query = 'UPDATE artists SET artist_name = %s, album_title = %s, release_date = %s, price = %s WHERE uuid::text = ' + \
+            "'" + str(id) + "'"
+        put_data = (_artist_name, _album_title, _release_date, _price)
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
         cur.execute(query, put_data)
