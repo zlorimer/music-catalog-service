@@ -1,0 +1,16 @@
+version: '3'
+services:
+  mcs:
+    build:
+      context: ./mcs/.
+    ports:
+      - "80:80"
+  postgres:
+    build: 
+      context: ./postgres/.
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=musicdb
+      - POSTGRES_USER=musical
+      - POSTGRES_PASSWORD=abcdefg
