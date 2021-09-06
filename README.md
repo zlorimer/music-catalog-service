@@ -21,4 +21,3 @@ Then run docker-compose up
 | /putalbum/\<uuid\> | Updates an album based on matching UUID |
 | /deleteartist/\<uuid\> | Delets an artist based on UUID |
 | /deletealbum/\<uuid\> | Dletes an album base don UUID |
----
