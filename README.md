@@ -42,3 +42,9 @@ Post an artist
    - Flask-Restful, Flask-SQLAlchemy, Flask-Marshmallow (this v2 was SO much cleaner and easier to support)
  - Create helm chart to allow deploying against k8s clusters
  - Create tests for CI/CD (eg: Do all methods work correctly?)
+## In AWS Context / Production
+- Run the Postgres instance in RDS w/RDS Proxy to handle connection pooling
+  - DBs in containers worry me
+- Store app container in ECR and pull into EKS as needed
+- Make sure there are separate Landing Zones (dev, stage, prod)
+  - Keep clusters segmented to avoid accidentally grenading prod
