@@ -6,12 +6,12 @@ from flask_uuid import FlaskUUID
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 
-mcs = Flask(__name__)
-mcs.config['JSON_SORT_KEYS'] = False
-FlaskUUID(mcs)
+app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
+FlaskUUID(app)
 
 # Healthcheck
-@mcs.route('/')
+@app.route('/')
 def index():
     return jsonify({'messsage': 'connection successful'}), 201
 
@@ -19,7 +19,7 @@ try:
     pgdb_conn_pool = psycopg2.pool.ThreadedConnectionPool(1, 20, host="postgres", user="musical", password="abcdefg", database="musicdb")
 
     # GET all
-    @mcs.route('/artistlist', methods=['GET'])
+    @app.route('/artistlist', methods=['GET'])
     def get_artist_namelist():
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -30,7 +30,7 @@ try:
         return jsonify(resp)
 
     # POST
-    @mcs.route('/postartist', methods=['POST'])
+    @app.route('/postartist', methods=['POST'])
     def post_artist_name():
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
@@ -50,7 +50,7 @@ try:
         return jsonify(resp)
 
     # GET
-    @mcs.route('/getartist/<uuid:id>', methods=['GET'])
+    @app.route('/getartist/<uuid:id>', methods=['GET'])
     def get_artist_name(id):
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -62,7 +62,7 @@ try:
         return jsonify(resp)
 
     # DELETE
-    @mcs.route('/deleteartist/<uuid:id>', methods=['DELETE'])
+    @app.route('/deleteartist/<uuid:id>', methods=['DELETE'])
     def delete_passenger(id):
         conn = pgdb_conn_pool.getconn()
         cur = conn.cursor()
@@ -74,7 +74,7 @@ try:
         return jsonify(resp)
 
     # PUT
-    @mcs.route('/putartist/<uuid:id>', methods=['PUT'])
+    @app.route('/putartist/<uuid:id>', methods=['PUT'])
     def put_passenger(id):
         req_data = request.get_json()
         _artist_name = req_data['artist_name']
@@ -93,4 +93,4 @@ finally:
     print("closing all")
 
 if __name__ == '__main__':
-    mcs.run(debug=True)
+    app.run(debug=True)

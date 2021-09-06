@@ -12,11 +12,11 @@ RUN apk add -u git && \
     git clone https://github.com/zlorimer/music-catalog-service.git && \
 # Configure the container
     rm /etc/nginx/conf.d/default.conf && \
-    cp /code/music-catalog-service/src/mcs/conf/default.conf /etc/nginx/conf.d/default.conf && \
+    cp /code/music-catalog-service/src/app/conf/default.conf /etc/nginx/conf.d/default.conf && \
     rm /etc/supervisord.conf && \
-    cp /code/music-catalog-service/src/mcs/conf/supervisord.conf /etc/supervisord.conf && \
+    cp /code/music-catalog-service/src/app/conf/supervisord.conf /etc/supervisord.conf && \
     mkdir /etc/supervisor.d /var/log/supervisord && \
-    cp -r /code/music-catalog-service/src/mcs/app /app
+    cp -r /code/music-catalog-service/src/app/app /app
 
 WORKDIR /app
 
